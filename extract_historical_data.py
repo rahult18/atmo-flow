@@ -49,8 +49,8 @@ om = openmeteo_requests.Client(session=cache_session)
 latitude = 40.7128
 longitude = -74.0060
 
-# Calculate dates for last 6 months
-end_date = datetime.now()
+# Calculate dates for last 6 months (excluding today)
+end_date = datetime.now().replace(hour=0, minute=0, second=0, microsecond=0) - timedelta(days=1)  # yesterday at midnight
 start_date = end_date - timedelta(days=180)
 
 # Weather API parameters

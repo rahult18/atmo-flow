@@ -4,4 +4,4 @@
 `python3 -m venv atmoflow ` \
 `source atmoflow/bin/activate `
 
-2.
+2. Pulling Historical Data
