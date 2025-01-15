@@ -3,7 +3,6 @@ import requests_cache
 import pandas as pd
 from datetime import datetime, timedelta
 from openmeteo_sdk.Variable import Variable
-import requests
 from requests.adapters import HTTPAdapter
 from urllib3.util.retry import Retry
 
@@ -50,9 +49,9 @@ om = openmeteo_requests.Client(session=cache_session)
 latitude = 40.7128
 longitude = -74.0060
 
-# Calculate dates for last 2 months
+# Calculate dates for last 6 months
 end_date = datetime.now()
-start_date = end_date - timedelta(days=60)
+start_date = end_date - timedelta(days=180)
 
 # Weather API parameters
 weather_params = {
