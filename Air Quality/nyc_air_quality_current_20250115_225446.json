@@ -1,0 +1,26 @@
+{
+  "metadata": {
+    "timestamp": "2025-01-15T22:54:46.962261",
+    "location": {
+      "latitude": 40.7128,
+      "longitude": -74.006,
+      "city": "New York City"
+    },
+    "data_source": "Open-Meteo Air Quality API"
+  },
+  "current_conditions": {
+    "timestamp": "2025-01-15T22:54:46.962261",
+    "values": {
+      "pm10": 7.2,
+      "pm2_5": 7.1,
+      "carbon_monoxide": 227.0,
+      "nitrogen_dioxide": 36.6,
+      "sulphur_dioxide": 4.3,
+      "ozone": 39.0,
+      "aerosol_optical_depth": 0.04,
+      "dust": 0.0,
+      "uv_index": 0.0,
+      "us_aqi": 20
+    }
+  }
+}
