@@ -97,7 +97,6 @@ def fetch_weather_data():
             "location": {
                 "latitude": latitude,
                 "longitude": longitude,
-                "city": "New York City"
             },
             "data_source": "Open-Meteo API"
         },

@@ -61,7 +61,6 @@ def fetch_air_quality_data():
             "location": {
                 "latitude": latitude,
                 "longitude": longitude,
-                "city": "New York City"
             },
             "data_source": "Open-Meteo Air Quality API"
         },
