@@ -109,7 +109,7 @@ def fetch_air_quality_data(start_date, end_date):
         raise
 
 def fetch_weather_data(start_date, end_date):
-    """Fetch historical weather data"""
+    """Fetch historical weather data with hourly granularity"""
     try:
         print(f"Fetching weather data from {start_date} to {end_date}")
         
@@ -118,20 +118,26 @@ def fetch_weather_data(start_date, end_date):
             "longitude": LONGITUDE,
             "start_date": start_date.strftime("%Y-%m-%d"),
             "end_date": end_date.strftime("%Y-%m-%d"),
-            "daily": [
-                "temperature_2m_max",
-                "temperature_2m_min",
-                "apparent_temperature_max",
-                "apparent_temperature_min",
-                "precipitation_sum",
-                "rain_sum",
-                "snowfall_sum",
-                "wind_speed_10m_max",
-                "wind_gusts_10m_max",
-                "wind_direction_10m_dominant",
-                "daylight_duration",
-                "weather_code"
-            ]
+            "hourly": [
+                "temperature_2m",
+                "relative_humidity_2m",
+                "apparent_temperature",
+                "precipitation",
+                "rain",
+                "snowfall",
+                "cloud_cover",
+                "cloud_cover_low",
+                "cloud_cover_mid", 
+                "cloud_cover_high",
+                "surface_pressure",
+                "visibility",
+                "wind_speed_10m",
+                "wind_direction_10m",
+                "wind_gusts_10m",
+                "weather_code",
+                "precipitation_probability"
+            ],
+            "timezone": "America/New_York"
         }
         
         weather_responses = om.weather_api(
@@ -139,29 +145,48 @@ def fetch_weather_data(start_date, end_date):
             params=weather_params
         )
         weather_response = weather_responses[0]
-        weather_daily = weather_response.Daily()
+        weather_hourly = weather_response.Hourly()
         
-        # Create DataFrame
+        # Create DataFrame with hourly timestamps
         weather_df = pd.DataFrame({
             "time": pd.date_range(
-                start=pd.to_datetime(weather_daily.Time(), unit="s"),
-                end=pd.to_datetime(weather_daily.TimeEnd(), unit="s"),
-                freq=pd.Timedelta(days=1),
+                start=pd.to_datetime(weather_hourly.Time(), unit="s"),
+                end=pd.to_datetime(weather_hourly.TimeEnd(), unit="s"),
+                freq=pd.Timedelta(hours=1),
                 inclusive="left"
             )
         })
         
+        # Map the variables to match streaming format
+        variable_mapping = {
+            "temperature_2m": "temperature_2m",
+            "relative_humidity_2m": "relative_humidity_2m",
+            "apparent_temperature": "apparent_temperature",
+            "precipitation": "precipitation",
+            "rain": "rain",
+            "snowfall": "snowfall",
+            "cloud_cover": "cloud_cover",
+            "cloud_cover_low": "cloud_cover_low",
+            "cloud_cover_mid": "cloud_cover_mid",
+            "cloud_cover_high": "cloud_cover_high",
+            "surface_pressure": "surface_pressure",
+            "visibility": "visibility",
+            "wind_speed_10m": "wind_speed_10m",
+            "wind_direction_10m": "wind_direction_10m",
+            "wind_gusts_10m": "wind_gusts_10m",
+            "weather_code": "weather_code",
+            "precipitation_probability": "precipitation_probability"
+        }
+        
         # Add all available metrics
-        for i in range(weather_daily.VariablesLength()):
-            var = weather_daily.Variables(i)
-            var_name = weather_params["daily"][i]
-            weather_df[var_name] = var.ValuesAsNumpy()
+        for i, var_name in enumerate(weather_params["hourly"]):
+            var = weather_hourly.Variables(i)
+            column_name = variable_mapping.get(var_name, var_name)
+            weather_df[column_name] = var.ValuesAsNumpy()
         
         # Convert data types
-        if 'weather_code' in weather_df.columns:
-            weather_df['weather_code'] = weather_df['weather_code'].astype(int)
-        if 'daylight_duration' in weather_df.columns:
-            weather_df['daylight_duration'] = weather_df['daylight_duration'].round(2)
+        weather_df['weather_code'] = weather_df['weather_code'].astype(float)
+        weather_df['precipitation_probability'] = weather_df['precipitation_probability'].astype(float)
         
         print("Successfully fetched weather data")
         return weather_df
