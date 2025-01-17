@@ -1,0 +1,5 @@
+functions-framework==3.*
+google-cloud-pubsub==2.*
+requests-cache==1.*
+openmeteo-requests==1.*
+urllib3==2.*
