@@ -1,0 +1,9 @@
+functions-framework==3.*
+requests-cache==1.*
+pandas==2.*
+openmeteo-requests==1.*
+openmeteo-sdk==1.*
+google-cloud-storage==2.*
+urllib3==2.*
+numpy==1.*
+python-dateutil==2.*
