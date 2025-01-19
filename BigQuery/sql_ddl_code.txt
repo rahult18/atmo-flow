@@ -203,6 +203,19 @@ OPTIONS(
   description="Shared severity dimension for weather and air quality conditions"
 );
 
+
+
+// To delete all data form tables
+TRUNCATE TABLE `atmo-flow.weather_air_quality.AirQualityFact`;
+TRUNCATE TABLE `atmo-flow.weather_air_quality.AirQualityStatusDim`;
+TRUNCATE TABLE `atmo-flow.weather_air_quality.HarmonizedData`;
+TRUNCATE TABLE `atmo-flow.weather_air_quality.LocationDim`;
+TRUNCATE TABLE `atmo-flow.weather_air_quality.SeasonDim`;
+TRUNCATE TABLE `atmo-flow.weather_air_quality.SeverityDim`;
+TRUNCATE TABLE `atmo-flow.weather_air_quality.TimeDim`;
+TRUNCATE TABLE `atmo-flow.weather_air_quality.WeatherConditionDim`;
+TRUNCATE TABLE `atmo-flow.weather_air_quality.WeatherFact`;
+
 // Add Foreign Key Constraints
 
 BigQuery currently doesn't support enforcing foreign key constraints - they can only be declared for documentation purposes. 
