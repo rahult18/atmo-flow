@@ -1,0 +1,149 @@
+// First, create the dataset
+
+CREATE SCHEMA IF NOT EXISTS `weather_air_quality`
+OPTIONS (
+  location = "US"
+);
+
+// Create Dimension Tables
+-- TimeDim table
+CREATE OR REPLACE TABLE `weather_air_quality.TimeDim`
+(
+  time_key INT64 NOT NULL,
+  full_date DATE NOT NULL,
+  year INT64 NOT NULL,
+  quarter INT64 NOT NULL,
+  month INT64 NOT NULL,
+  day INT64 NOT NULL,
+  hour INT64 NOT NULL,
+  day_of_week INT64 NOT NULL,
+  is_weekend BOOL NOT NULL,
+  season STRING NOT NULL,
+  is_holiday BOOL NOT NULL
+)
+PARTITION BY full_date
+CLUSTER BY hour
+OPTIONS(
+  description="Time dimension table for weather and air quality measurements"
+);
+
+-- LocationDim table
+CREATE OR REPLACE TABLE `weather_air_quality.LocationDim`
+(
+  location_key INT64 NOT NULL,
+  latitude FLOAT64 NOT NULL,
+  longitude FLOAT64 NOT NULL,
+  city STRING NOT NULL,
+  region STRING NOT NULL,
+  climate_zone STRING NOT NULL,
+  elevation FLOAT64 NOT NULL
+)
+CLUSTER BY city, region
+OPTIONS(
+  description="Location dimension table for measurement locations"
+);
+
+-- AirQualityStatusDim table
+CREATE OR REPLACE TABLE `weather_air_quality.AirQualityStatusDim`
+(
+  status_key INT64 NOT NULL,
+  aqi_category STRING NOT NULL,
+  health_implications STRING NOT NULL,
+  cautionary_statement STRING NOT NULL,
+  color_code STRING NOT NULL
+)
+OPTIONS(
+  description="Air quality status classification and descriptions"
+);
+
+-- WeatherConditionDim table
+CREATE OR REPLACE TABLE `weather_air_quality.WeatherConditionDim`
+(
+  condition_key INT64 NOT NULL,
+  weather_code INT64 NOT NULL,
+  description STRING NOT NULL,
+  category STRING NOT NULL,
+  severity_level INT64 NOT NULL
+)
+OPTIONS(
+  description="Weather conditions classification and descriptions"
+);
+
+// Create Fact Tables
+-- AirQualityFact table
+CREATE OR REPLACE TABLE `weather_air_quality.AirQualityFact`
+(
+  timestamp DATETIME NOT NULL,
+  location_key INT64 NOT NULL,
+  status_key INT64 NOT NULL,
+  pm2_5 FLOAT64,
+  pm10 FLOAT64,
+  carbon_monoxide FLOAT64,
+  nitrogen_dioxide FLOAT64,
+  sulphur_dioxide FLOAT64,
+  ozone FLOAT64,
+  us_aqi INT64,
+  aerosol_optical_depth FLOAT64,
+  dust FLOAT64,
+  uv_index FLOAT64
+)
+PARTITION BY DATE(timestamp)
+CLUSTER BY location_key, status_key
+OPTIONS(
+  description="Air quality measurements fact table"
+);
+
+-- WeatherFact table
+CREATE OR REPLACE TABLE `weather_air_quality.WeatherFact`
+(
+  timestamp DATETIME NOT NULL,
+  location_key INT64 NOT NULL,
+  condition_key INT64 NOT NULL,
+  temperature_2m FLOAT64,
+  apparent_temperature FLOAT64,
+  precipitation FLOAT64,
+  wind_speed_10m FLOAT64,
+  wind_direction_10m INT64,
+  relative_humidity_2m FLOAT64,
+  surface_pressure FLOAT64,
+  cloud_cover INT64,
+  visibility FLOAT64
+)
+PARTITION BY DATE(timestamp)
+CLUSTER BY location_key, condition_key
+OPTIONS(
+  description="Weather measurements fact table"
+);
+
+
+// Add Foreign Key Constraints
+
+BigQuery currently doesn't support enforcing foreign key constraints - they can only be declared for documentation purposes. 
+This is one of BigQuery's limitations.
+
+Instead, we'll need to ensure referential integrity at the application level (in our Dataflow pipeline). Here are a few strategies we can use:
+
+For the Dataflow pipeline, we'll need to:
+
+    - Load dimension tables into memory at the start of the pipeline
+    - Validate foreign keys during transformation steps
+    - Implement error handling for invalid references
+    - Use side inputs in Beam to reference dimension data
+
+-- Add foreign key constraints for AirQualityFact
+ALTER TABLE `weather_air_quality.AirQualityFact`
+ADD CONSTRAINT fk_location_air 
+FOREIGN KEY (location_key) REFERENCES `weather_air_quality.LocationDim` (location_key);
+
+ALTER TABLE `weather_air_quality.AirQualityFact`
+ADD CONSTRAINT fk_status 
+FOREIGN KEY (status_key) REFERENCES `weather_air_quality.AirQualityStatusDim` (status_key);
+
+-- Add foreign key constraints for WeatherFact
+ALTER TABLE `weather_air_quality.WeatherFact`
+ADD CONSTRAINT fk_location_weather 
+FOREIGN KEY (location_key) REFERENCES `weather_air_quality.LocationDim` (location_key);
+
+ALTER TABLE `weather_air_quality.WeatherFact`
+ADD CONSTRAINT fk_condition 
+FOREIGN KEY (condition_key) REFERENCES `weather_air_quality.WeatherConditionDim` (condition_key);
