@@ -18,7 +18,6 @@ CREATE OR REPLACE TABLE `weather_air_quality.TimeDim`
   hour INT64 NOT NULL,
   day_of_week INT64 NOT NULL,
   is_weekend BOOL NOT NULL,
-  season STRING NOT NULL,
   is_holiday BOOL NOT NULL
 )
 PARTITION BY full_date
@@ -99,20 +98,28 @@ CREATE OR REPLACE TABLE `weather_air_quality.WeatherFact`
   timestamp DATETIME NOT NULL,
   location_key INT64 NOT NULL,
   condition_key INT64 NOT NULL,
+  severity_key INT64 NOT NULL,
+  season_key INT64 NOT NULL,
   temperature_2m FLOAT64,
   apparent_temperature FLOAT64,
   precipitation FLOAT64,
+  snowfall FLOAT64,
   wind_speed_10m FLOAT64,
   wind_direction_10m INT64,
+  wind_gusts_10m FLOAT64,
   relative_humidity_2m FLOAT64,
   surface_pressure FLOAT64,
   cloud_cover INT64,
-  visibility FLOAT64
+  cloud_cover_low INT64,
+  cloud_cover_mid INT64,
+  cloud_cover_high INT64,
+  visibility FLOAT64,
+  precipitation_probability FLOAT64
 )
 PARTITION BY DATE(timestamp)
-CLUSTER BY location_key, condition_key
+CLUSTER BY location_key, severity_key
 OPTIONS(
-  description="Weather measurements fact table"
+  description="Enhanced weather measurements fact table"
 );
 
 
@@ -166,6 +173,34 @@ CLUSTER BY
 OPTIONS(
     description="Harmonized weather and air quality data for machine learning",
     labels=[("domain", "environmental"), ("data_type", "harmonized")]
+);
+
+CREATE OR REPLACE TABLE `weather_air_quality.SeasonDim`
+(
+  season_key INT64 NOT NULL,
+  season_name STRING NOT NULL,
+  start_month INT64 NOT NULL,
+  end_month INT64 NOT NULL,
+  avg_daylight_hours FLOAT64,
+  typical_temp_range STRING,
+  characteristic_weather STRING
+)
+OPTIONS(
+  description="Season dimension with detailed seasonal characteristics"
+);
+
+-- Create new SeverityDim table
+CREATE OR REPLACE TABLE `weather_air_quality.SeverityDim`
+(
+  severity_key INT64 NOT NULL,
+  severity_level INT64 NOT NULL,
+  severity_name STRING NOT NULL,
+  description STRING NOT NULL,
+  recommended_actions STRING NOT NULL,
+  alert_level STRING NOT NULL
+)
+OPTIONS(
+  description="Shared severity dimension for weather and air quality conditions"
 );
 
 // Add Foreign Key Constraints
