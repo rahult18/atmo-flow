@@ -116,6 +116,58 @@ OPTIONS(
 );
 
 
+-- Create HarmonizedData table with partitioning and clustering
+CREATE OR REPLACE TABLE `atmo-flow.weather_air_quality.HarmonizedData`
+(
+    -- Timestamp
+    timestamp TIMESTAMP NOT NULL,
+    location_key INT64 NOT NULL,
+    
+    -- Weather Features
+    temperature_2m FLOAT64,
+    apparent_temperature FLOAT64,
+    precipitation FLOAT64,
+    wind_speed_10m FLOAT64,
+    wind_direction_10m INT64,
+    relative_humidity_2m FLOAT64,
+    surface_pressure FLOAT64,
+    cloud_cover INT64,
+    visibility FLOAT64,
+    
+    -- Air Quality Features
+    pm2_5 FLOAT64,
+    pm10 FLOAT64,
+    carbon_monoxide FLOAT64,
+    nitrogen_dioxide FLOAT64,
+    sulphur_dioxide FLOAT64,
+    ozone FLOAT64,
+    us_aqi INT64,
+    aerosol_optical_depth FLOAT64,
+    dust FLOAT64,
+    uv_index FLOAT64,
+    
+    -- Time Features
+    year INT64 NOT NULL,
+    month INT64 NOT NULL,
+    hour INT64,
+    day_of_week INT64,
+    is_weekend BOOL,
+    season STRING,
+    
+    -- Location Features
+    latitude FLOAT64,
+    longitude FLOAT64,
+    elevation FLOAT64
+)
+PARTITION BY
+    DATE_TRUNC(timestamp, MONTH)
+CLUSTER BY
+    location_key, year, month
+OPTIONS(
+    description="Harmonized weather and air quality data for machine learning",
+    labels=[("domain", "environmental"), ("data_type", "harmonized")]
+);
+
 // Add Foreign Key Constraints
 
 BigQuery currently doesn't support enforcing foreign key constraints - they can only be declared for documentation purposes. 
