@@ -215,35 +215,3 @@ TRUNCATE TABLE `atmo-flow.weather_air_quality.SeverityDim`;
 TRUNCATE TABLE `atmo-flow.weather_air_quality.TimeDim`;
 TRUNCATE TABLE `atmo-flow.weather_air_quality.WeatherConditionDim`;
 TRUNCATE TABLE `atmo-flow.weather_air_quality.WeatherFact`;
-
-// Add Foreign Key Constraints
-
-BigQuery currently doesn't support enforcing foreign key constraints - they can only be declared for documentation purposes. 
-This is one of BigQuery's limitations.
-
-Instead, we'll need to ensure referential integrity at the application level (in our Dataflow pipeline). Here are a few strategies we can use:
-
-For the Dataflow pipeline, we'll need to:
-
-    - Load dimension tables into memory at the start of the pipeline
-    - Validate foreign keys during transformation steps
-    - Implement error handling for invalid references
-    - Use side inputs in Beam to reference dimension data
-
--- Add foreign key constraints for AirQualityFact
-ALTER TABLE `weather_air_quality.AirQualityFact`
-ADD CONSTRAINT fk_location_air 
-FOREIGN KEY (location_key) REFERENCES `weather_air_quality.LocationDim` (location_key);
-
-ALTER TABLE `weather_air_quality.AirQualityFact`
-ADD CONSTRAINT fk_status 
-FOREIGN KEY (status_key) REFERENCES `weather_air_quality.AirQualityStatusDim` (status_key);
-
--- Add foreign key constraints for WeatherFact
-ALTER TABLE `weather_air_quality.WeatherFact`
-ADD CONSTRAINT fk_location_weather 
-FOREIGN KEY (location_key) REFERENCES `weather_air_quality.LocationDim` (location_key);
-
-ALTER TABLE `weather_air_quality.WeatherFact`
-ADD CONSTRAINT fk_condition 
-FOREIGN KEY (condition_key) REFERENCES `weather_air_quality.WeatherConditionDim` (condition_key);
