@@ -8,7 +8,7 @@ AtmoFlow is a robust data engineering pipeline built on Google Cloud Platform (G
 
 ## Architecture
 
-![Project Architecture](Project_Architecture.png)
+![Project Architecture](Project Architecture.png)
 
 The pipeline consists of several key components:
 
