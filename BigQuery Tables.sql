@@ -1,11 +1,10 @@
-// First, create the dataset
+-- First we create the dataset
 
 CREATE SCHEMA IF NOT EXISTS `weather_air_quality`
 OPTIONS (
   location = "US"
 );
 
-// Create Dimension Tables
 -- TimeDim table
 CREATE OR REPLACE TABLE `weather_air_quality.TimeDim`
 (
@@ -68,7 +67,6 @@ OPTIONS(
   description="Weather conditions classification and descriptions"
 );
 
-// Create Fact Tables
 -- AirQualityFact table
 CREATE OR REPLACE TABLE `weather_air_quality.AirQualityFact`
 (
@@ -122,7 +120,6 @@ OPTIONS(
   description="Enhanced weather measurements fact table"
 );
 
-
 -- Create HarmonizedData table with partitioning and clustering
 CREATE OR REPLACE TABLE `atmo-flow.weather_air_quality.HarmonizedData`
 (
@@ -175,6 +172,7 @@ OPTIONS(
     labels=[("domain", "environmental"), ("data_type", "harmonized")]
 );
 
+-- Create SeasonDim table
 CREATE OR REPLACE TABLE `weather_air_quality.SeasonDim`
 (
   season_key INT64 NOT NULL,
@@ -189,7 +187,7 @@ OPTIONS(
   description="Season dimension with detailed seasonal characteristics"
 );
 
--- Create new SeverityDim table
+-- Create SeverityDim table
 CREATE OR REPLACE TABLE `weather_air_quality.SeverityDim`
 (
   severity_key INT64 NOT NULL,
@@ -202,16 +200,3 @@ CREATE OR REPLACE TABLE `weather_air_quality.SeverityDim`
 OPTIONS(
   description="Shared severity dimension for weather and air quality conditions"
 );
-
-
-
-// To delete all data form tables
-TRUNCATE TABLE `atmo-flow.weather_air_quality.AirQualityFact`;
-TRUNCATE TABLE `atmo-flow.weather_air_quality.AirQualityStatusDim`;
-TRUNCATE TABLE `atmo-flow.weather_air_quality.HarmonizedData`;
-TRUNCATE TABLE `atmo-flow.weather_air_quality.LocationDim`;
-TRUNCATE TABLE `atmo-flow.weather_air_quality.SeasonDim`;
-TRUNCATE TABLE `atmo-flow.weather_air_quality.SeverityDim`;
-TRUNCATE TABLE `atmo-flow.weather_air_quality.TimeDim`;
-TRUNCATE TABLE `atmo-flow.weather_air_quality.WeatherConditionDim`;
-TRUNCATE TABLE `atmo-flow.weather_air_quality.WeatherFact`;
